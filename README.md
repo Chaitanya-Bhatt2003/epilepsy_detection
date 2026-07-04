@@ -6,6 +6,12 @@ learning model. Trained on the UCI *Epileptic Seizure Recognition* dataset
 
 **Results on held-out test data:** 98.4% accuracy · ROC-AUC 0.9988 · 343 of 345 seizures caught.
 
+### ▶ [View the live presentation »](https://chaitanya-bhatt2003.github.io/epilepsy_detection/)
+
+An interactive project page (hosted on GitHub Pages) with a live EEG monitor, the results,
+and the model architecture — no setup required. The "Launch detector" button on that page
+runs the local demo app (`python app.py`), so start it first if you want to try live detection.
+
 ## Contents
 
 | File | Description |

@@ -1,0 +1,11 @@
+segment,true_label
+0,non-seizure
+1,non-seizure
+2,seizure
+3,non-seizure
+4,seizure
+5,non-seizure
+6,seizure
+7,seizure
+8,seizure
+9,non-seizure

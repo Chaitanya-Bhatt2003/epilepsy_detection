@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated at runtime (not source)
+server.log
+predictions.csv
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Note: the EEG dataset CSV lives outside this folder and is not tracked.

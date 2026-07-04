@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seizure Detection — Viva Cheat Sheet</title>
+<style>
+  @page{ size:A4; margin:11mm; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  :root{
+    --ink:#12181f; --soft:#414b57; --muted:#6b7480;
+    --line:#c9d2df; --accent:#0c7d75; --accsoft:#e2f2f0; --seiz:#c23138; --seizsoft:#fbe6e6;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    --mono:"Cascadia Code","Consolas",ui-monospace,monospace;
+  }
+  html,body{ background:#fff; color:var(--ink); font-family:var(--font);
+    font-size:9pt; line-height:1.34; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .sheet{ width:100%; max-width:190mm; margin:0 auto; }
+
+  /* header */
+  header{ border-bottom:2px solid var(--ink); padding-bottom:6px; margin-bottom:8px; }
+  .eyebrow{ font-family:var(--mono); font-size:7.5pt; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; }
+  h1{ font-size:16pt; letter-spacing:-.01em; margin:1px 0 3px; }
+  .pitch{ font-style:italic; color:var(--soft); font-size:9pt; max-width:150mm; }
+  .stats{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .chip{ font-family:var(--mono); font-size:7.6pt; font-weight:700; padding:3px 8px; border-radius:4px;
+    background:var(--accsoft); color:var(--accent); border:1px solid var(--accent); }
+  .chip.r{ background:var(--seizsoft); color:var(--seiz); border-color:var(--seiz); }
+
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  section{ break-inside:avoid; margin-bottom:7px; }
+  h2{ font-family:var(--mono); font-size:8pt; letter-spacing:.1em; text-transform:uppercase;
+    color:#fff; background:var(--ink); padding:3px 7px; border-radius:3px; margin-bottom:5px; }
+  h2.acc{ background:var(--accent); }
+  h2.red{ background:var(--seiz); }
+
+  ol,ul{ margin-left:0; list-style:none; }
+  .step{ display:flex; gap:6px; margin-bottom:4px; }
+  .num{ font-family:var(--mono); font-weight:700; color:var(--accent); flex:none; width:12px; }
+  .step b{ color:var(--ink); }
+  .say{ color:var(--soft); }
+  .say::before{ content:"\201C"; } .say::after{ content:"\201D"; }
+
+  .kv{ display:flex; gap:5px; margin-bottom:3px; }
+  .kv .k{ font-weight:700; flex:none; }
+  .qa{ margin-bottom:5px; }
+  .qa .q{ font-weight:700; color:var(--seiz); }
+  .qa .a{ color:var(--soft); }
+
+  code, .mono{ font-family:var(--mono); font-size:8.2pt; background:#f1f4f9; padding:1px 4px;
+    border-radius:3px; border:1px solid var(--line); }
+  .box{ border:1px solid var(--line); border-radius:5px; padding:6px 8px; background:#f7f9fc; }
+  .num-quote{ display:grid; grid-template-columns:auto 1fr; gap:2px 8px; font-size:8.6pt; }
+  .num-quote b{ font-family:var(--mono); color:var(--accent); }
+  .tbl{ width:100%; border-collapse:collapse; font-size:8.2pt; }
+  .tbl td{ border-top:1px solid var(--line); padding:2.5px 4px; vertical-align:top; }
+  .tbl td:first-child{ font-weight:700; white-space:nowrap; }
+  footer{ margin-top:6px; border-top:1px solid var(--line); padding-top:4px;
+    font-family:var(--mono); font-size:7.4pt; color:var(--muted); display:flex; justify-content:space-between; }
+  @media screen{ body{ background:#e9edf3; padding:16px; } .sheet{ background:#fff; padding:14mm;
+    box-shadow:0 4px 24px rgba(0,0,0,.15); border-radius:4px; } .noprint{ text-align:center; margin-bottom:12px; }
+    .pbtn{ font:inherit; font-weight:700; background:var(--accent); color:#fff; border:0; padding:9px 18px;
+      border-radius:8px; cursor:pointer; } }
+  @media print{ .noprint{ display:none; } }
+</style>
+</head>
+<body>
+<div class="noprint"><button class="pbtn" onclick="window.print()">Print / Save as PDF</button></div>
+<div class="sheet">
+
+  <header>
+    <div class="eyebrow">Viva Cheat Sheet · Chaitanya Bhatt</div>
+    <h1>Epileptic Seizure Detection from EEG — CNN-LSTM</h1>
+    <div class="pitch">I built an AI that reads one second of brain-wave data and detects epileptic seizures with 98% accuracy — and I can feed it brand-new recordings live and watch it flag the seizures correctly.</div>
+    <div class="stats">
+      <span class="chip">98.4% accuracy</span>
+      <span class="chip">AUC 0.9988</span>
+      <span class="chip r">343 / 345 seizures caught</span>
+      <span class="chip">11,500 EEG clips</span>
+      <span class="chip">CNN-LSTM · TensorFlow</span>
+    </div>
+  </header>
+
+  <div class="cols">
+    <!-- LEFT -->
+    <div>
+      <section>
+        <h2 class="acc">Setup — before you start</h2>
+        <div class="step"><span class="num">1</span><div>Terminal in project folder → run <code>python app.py</code>, wait for <b>"running"</b> (~15s).</div></div>
+        <div class="step"><span class="num">2</span><div>Open 3 tabs: <b>index.html</b> (website) · <b>main_1.ipynb</b> (notebook) · <b>localhost:8000</b> (live demo).</div></div>
+      </section>
+
+      <section>
+        <h2>The 6–8 minute flow</h2>
+        <div class="step"><span class="num">1</span><div><b>Website.</b> Scroll top→bottom. <span class="say">Detects seizures from EEG; the monitor flags a seizure in red — that's what my model does.</span></div></div>
+        <div class="step"><span class="num">2</span><div><b>Results.</b> <span class="say">98.4% accuracy, AUC 0.9988; caught 343 of 345 seizures — it rarely misses one, which matters clinically.</span></div></div>
+        <div class="step"><span class="num">3</span><div><b>Method.</b> <span class="say">CNN learns the signal's spikes; LSTM models how they evolve over the second. Random Forest baseline proves the deep model adds value.</span></div></div>
+        <div class="step"><span class="num">4</span><div><b>Live demo</b> (localhost:8000) — <i>the highlight, see right.</i></div></div>
+        <div class="step"><span class="num">5</span><div><b>Close.</b> <span class="say">A CNN-LSTM at 98% accuracy, works live on unseen data, validated honestly. Next: patient-independent testing.</span></div></div>
+      </section>
+
+      <section>
+        <h2 class="red">The live demo — clicks</h2>
+        <div class="step"><span class="num">a</span><div>Click <b>🎲 Try a random unseen recording</b> ×2–3. <span class="say">A real clip the model never saw — it predicts, then reveals the true answer with a ✓.</span></div></div>
+        <div class="step"><span class="num">b</span><div>Click <b>5 random recordings</b> — show confidence bars + waveforms.</div></div>
+        <div class="step"><span class="num">c</span><div>Drag the <b>threshold slider</b>. <span class="say">The clinical trade-off: lower catches more seizures, higher cuts false alarms.</span></div></div>
+        <div class="step"><span class="num">d</span><div>Offer the examiner the mouse — upload / click for themselves.</div></div>
+        <div class="box" style="margin-top:4px">Optional terminal flourish: <code>python score.py</code> → grades 10 unseen clips vs. a hidden key → <b>10/10 correct</b>.</div>
+      </section>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <section>
+        <h2 class="acc">Numbers to quote</h2>
+        <div class="box num-quote">
+          <span>Accuracy (test)</span><b>98.4%</b>
+          <span>ROC-AUC</span><b>0.9988</b>
+          <span>Seizures caught</span><b>343 / 345</b>
+          <span>False alarms</span><b>26 / 1380 (~2%)</b>
+          <span>Baseline (Random Forest)</span><b>AUC 0.9952</b>
+          <span>Dataset</span><b>11,500 × 178 samples</b>
+        </div>
+      </section>
+
+      <section>
+        <h2>Examiner Q&amp;A — quick answers</h2>
+        <div class="qa"><div class="q">Works on any EEG machine?</div><div class="a">No — needs the same format (single-channel, 178 samples/sec). Other devices need resampling first. The 🎲 button uses real clips in this exact format.</div></div>
+        <div class="qa"><div class="q">Not overfitting?</div><div class="a">Stratified train/val/test split, fixed seed, scaler fit on train only (no leakage), early stopping. All numbers are on the held-out test set.</div></div>
+        <div class="qa"><div class="q">Class imbalance (20% seizure)?</div><div class="a">Handled with class weighting; I report seizure recall &amp; precision, not just accuracy.</div></div>
+        <div class="qa"><div class="q">Why CNN and LSTM?</div><div class="a">CNN = local spike shapes; LSTM = temporal pattern. Baseline AUC 0.9952 vs deep 0.9988 shows it helps.</div></div>
+        <div class="qa"><div class="q">Improve with more time?</div><div class="a">Patient-independent splits, k-fold CV, spectrogram features, 5-class version, TensorFlow Lite for wearables.</div></div>
+        <div class="qa"><div class="q">Real-world use?</div><div class="a">Wearable seizure alerts, assisting neurologists, long-term monitoring.</div></div>
+      </section>
+
+      <section>
+        <h2 class="red">If it breaks</h2>
+        <table class="tbl">
+          <tr><td>Port in use</td><td>Set <code>PORT=8080</code> in app.py, reopen localhost:8080.</td></tr>
+          <tr><td>Blank page</td><td>Wait for "running", then refresh.</td></tr>
+          <tr><td>Model not found</td><td>Run the notebook once to save the model.</td></tr>
+          <tr><td>No internet</td><td>Fine — everything runs offline.</td></tr>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <span>main_1.ipynb · index.html · app.py · predict.py · score.py</span>
+    <span>End-Term Project · EEG · CNN-LSTM</span>
+  </footer>
+
+</div>
+</body>
+</html>

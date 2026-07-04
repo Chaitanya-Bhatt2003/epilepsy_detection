@@ -88,6 +88,23 @@
   .hero-headline .sig{color:var(--accent-ink);}
   .hero-headline p{margin-top:14px;font-family:var(--font-mono);font-size:13px;
     letter-spacing:.03em;color:var(--ink-soft);max-width:52ch;line-height:1.7;}
+  .hero-cta{margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;pointer-events:auto;}
+  .launch-btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-.01em;
+    color:#fff;background:var(--accent);border:1px solid var(--accent);
+    padding:13px 22px;border-radius:12px;box-shadow:var(--shadow);
+    transition:transform .08s ease,filter .2s ease;}
+  .launch-btn:hover{filter:brightness(1.06);}
+  .launch-btn:active{transform:translateY(1px);}
+  .launch-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .launch-btn .lb-dot{width:9px;height:9px;border-radius:50%;background:#fff;
+    box-shadow:0 0 0 0 rgba(255,255,255,.8);animation:pulse 2s infinite;}
+  .launch-btn .lb-arrow{font-size:16px;line-height:1;}
+  .cta-note{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em;}
+  .cta-note code{background:var(--surface);border:1px solid var(--border);
+    padding:1px 6px;border-radius:5px;font-size:11px;color:var(--ink-soft);}
+  @media (prefers-color-scheme:dark){.launch-btn{color:#04120f;}}
+  :root[data-theme="dark"] .launch-btn{color:#04120f;}
 
   /* ---------- generic ---------- */
   .grid{display:grid;gap:20px;}
@@ -309,6 +326,13 @@
         <p class="eyebrow">Deep Learning · Biomedical Signal Processing</p>
         <h1 style="margin-top:12px">Detecting <span class="sig">epileptic seizures</span> from EEG in real time</h1>
         <p>A CNN&#8209;LSTM neural network that reads one second of brain activity and flags seizure onset — trained on 11,500 EEG recordings, catching 343 of 345 seizures on unseen data.</p>
+        <div class="hero-cta">
+          <a class="launch-btn" href="http://localhost:8000" target="_blank" rel="noopener">
+            <span class="lb-dot"></span>Launch live detector
+            <span class="lb-arrow" aria-hidden="true">↗</span>
+          </a>
+          <span class="cta-note">opens in a new tab · run <code>python&nbsp;app.py</code> first</span>
+        </div>
       </div>
     </div>
   </div>

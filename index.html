@@ -216,12 +216,30 @@
   .foot-grid{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:baseline;}
   .foot-grid .mono{font-size:12.5px;}
 
+  /* sticky header */
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;padding:11px 24px;
+    background:color-mix(in srgb,var(--surface) 80%,transparent);
+    backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--border);}
+  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    font-weight:800;font-size:15px;letter-spacing:-.01em;color:var(--ink);}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;
+    box-shadow:0 0 0 0 var(--accent);animation:pulse 2s infinite;}
+  .brand-sub{color:var(--muted);font-weight:600;font-family:var(--font-mono);font-size:12px;}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+
   /* theme toggle */
-  .toggle{position:fixed;top:16px;right:16px;z-index:20;pointer-events:auto;
-    font-family:var(--font-mono);font-size:12px;padding:8px 12px;border-radius:999px;
-    border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);
-    cursor:pointer;box-shadow:var(--shadow);}
+  .toggle{pointer-events:auto;font-family:var(--font-mono);font-size:12px;padding:9px 13px;
+    border-radius:999px;border:1px solid var(--border);background:var(--surface-2);
+    color:var(--ink-soft);cursor:pointer;}
+  .toggle:hover{border-color:var(--accent);}
   .toggle:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .launch-btn.sm{padding:9px 15px;font-size:13.5px;border-radius:10px;box-shadow:none;}
+  @media (max-width:560px){
+    .brand-sub{display:none;}
+    .launch-btn.sm .lb-arrow{display:none;}
+  }
 
   @media (max-width:820px){
     .stats{grid-template-columns:repeat(2,1fr)}
@@ -278,8 +296,21 @@
   @media (prefers-reduced-motion:reduce){.cover-scroll .ar{animation:none;}}
 </style>
 
-<button class="toggle" id="themeToggle" aria-label="Toggle colour theme">◐ theme</button>
+<!-- ============ STICKY HEADER ============ -->
+<div class="topbar">
+  <a class="brand" href="#top" aria-label="Epileptic Seizure Detection — top">
+    <span class="brand-dot"></span>
+    <span class="brand-name">Seizure Detection<span class="brand-sub"> · CNN-LSTM</span></span>
+  </a>
+  <div class="topbar-actions">
+    <button class="toggle" id="themeToggle" aria-label="Toggle colour theme">◐ theme</button>
+    <a class="launch-btn sm" href="http://localhost:8000" target="_blank" rel="noopener">
+      <span class="lb-dot"></span>Launch detector<span class="lb-arrow" aria-hidden="true">↗</span>
+    </a>
+  </div>
+</div>
 
+<span id="top"></span>
 <!-- ============ COVER / TITLE SLIDE ============ -->
 <header class="cover">
   <div class="cover-grid"></div>

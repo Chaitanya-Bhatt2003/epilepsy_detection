@@ -58,3 +58,14 @@ matching the training data. The dataset CSV is not included in this repo.
 `Conv1D → BatchNorm → MaxPool` ×2 → `Bidirectional LSTM` ×2 → `Dense → Sigmoid`,
 trained with class weighting for the ~20/80 seizure imbalance, early stopping, and
 a clinically-aware threshold that favours seizure recall.
+
+## Deployment
+
+The live site is hosted on **Vercel** from the `web/` folder and is connected to this
+GitHub repo — every push to `main` automatically deploys to production (root directory
+`web`, no build step). To rebuild the browser assets after retraining the model:
+
+```bash
+python scripts/convert_to_web.py   # regenerates web/model, web/scaler.json, web/samples.json
+git commit -am "Update model" && git push   # auto-deploys
+```

@@ -1,0 +1,264 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seizure Detector - Live Demo</title>
+<style>
+:root{--bg:#eef1f7;--surface:#fff;--surface2:#f6f8fc;--border:#d7deec;--ink:#0f1826;
+--soft:#3f4a5e;--muted:#6b7688;--accent:#0c8f86;--accsoft:#d6efec;--seiz:#cf3339;
+--seizsoft:#fbe2e2;--trace:#0c8f86;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+--mono:ui-monospace,"Cascadia Code",Consolas,monospace;
+--sh:0 1px 2px rgba(15,24,38,.05),0 8px 30px rgba(15,24,38,.06);}
+@media(prefers-color-scheme:dark){:root{--bg:#090e17;--surface:#111927;--surface2:#0c131f;
+--border:#1d2a3d;--ink:#e9eef7;--soft:#aab6c9;--muted:#6f7c92;--accent:#26cbbe;
+--accsoft:rgba(38,203,190,.13);--seiz:#ff6a63;--seizsoft:rgba(255,106,99,.13);--trace:#26cbbe;
+--sh:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.35);}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:32px 20px 64px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+color:var(--accent);font-weight:600}
+.back{float:right;font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--accent)}
+h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;margin:.3em 0}
+.sub{color:var(--soft);max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+padding:22px;box-shadow:var(--sh);margin-top:20px}
+.title{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+color:var(--muted);font-weight:600;margin-bottom:14px}
+.btn{font-family:var(--font);font-size:15px;font-weight:600;border:1px solid var(--border);
+background:var(--surface2);color:var(--ink);padding:12px 18px;border-radius:10px;cursor:pointer;
+transition:transform .05s,border-color .2s}
+.btn:hover{border-color:var(--accent)}.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:progress}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media(prefers-color-scheme:dark){.btn.primary{color:#04120f}}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.drop{border:2px dashed var(--border);border-radius:12px;padding:22px;text-align:center;
+color:var(--muted);cursor:pointer;transition:.2s;font-size:14px}
+.drop.hover{border-color:var(--accent);background:var(--accsoft)}
+textarea{width:100%;min-height:70px;border:1px solid var(--border);border-radius:10px;
+background:var(--surface2);color:var(--ink);font-family:var(--mono);font-size:12px;padding:10px;resize:vertical}
+label.small{font-family:var(--mono);font-size:12px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);vertical-align:middle}
+.result{display:flex;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--border)}
+.result:first-child{border-top:none}
+.pill{font-family:var(--mono);font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;
+white-space:nowrap;flex:none;min-width:132px;text-align:center}
+.pill.seiz{background:var(--seizsoft);color:var(--seiz);border:1px solid var(--seiz)}
+.pill.non{background:var(--accsoft);color:var(--accent);border:1px solid var(--accent)}
+.meta{flex:1;min-width:0}
+.bar{height:8px;border-radius:6px;background:var(--surface2);overflow:hidden;margin-top:6px;border:1px solid var(--border)}
+.bar>i{display:block;height:100%;background:var(--seiz);border-radius:6px}
+.pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
+canvas{width:120px;height:48px;flex:none}
+.truth{font-family:var(--mono);font-size:12px;font-weight:700;flex:none}
+.truth.ok{color:var(--accent)}.truth.bad{color:var(--seiz)}
+.summary{font-family:var(--mono);font-size:14px;margin-top:8px;color:var(--soft)}
+.err{color:var(--seiz);font-family:var(--mono);font-size:13px;margin-top:10px}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+.status{font-family:var(--mono);font-size:12px;color:var(--muted)}
+a{color:var(--accent)}
+</style></head><body><div class="wrap">
+<a class="back" href="index.html">&larr; back to overview</a>
+<div class="eyebrow">Live model - CNN-LSTM</div>
+<h1>Seizure Detector</h1>
+<p class="sub">Give the model one second of EEG (178 numbers). It returns a seizure verdict and its confidence. Use a real unseen recording, upload a file, or paste your own numbers.</p>
+
+<div class="card">
+  <div class="title">1 - Choose input</div>
+  <div class="row">
+    <button class="btn primary" id="rnd">&#127922; Try a random unseen recording</button>
+    <button class="btn" id="rnd5">5 random recordings</button>
+    <span class="status" id="poolInfo">Loading model&hellip;</span>
+  </div>
+  <div style="margin-top:16px">
+    <div class="drop" id="drop">&#128193; <b>Upload a CSV</b> - or drag &amp; drop here<br>
+      <span style="font-size:12px">each row = 178 EEG samples</span>
+      <input type="file" id="file" accept=".csv,text/csv" hidden></div>
+  </div>
+  <details style="margin-top:14px"><summary class="label small" style="cursor:pointer">or paste numbers</summary>
+    <textarea id="paste" placeholder="Paste 178 comma-separated numbers (one recording per line)"></textarea>
+    <button class="btn" id="pasteBtn" style="margin-top:8px">Check pasted data</button>
+  </details>
+</div>
+
+<div class="card">
+  <div class="title">2 - Decision threshold</div>
+  <div class="row">
+    <input type="range" id="thr" min="0.05" max="0.95" step="0.01" value="0.5" style="flex:1">
+    <span class="pct" id="thrVal">0.50</span>
+  </div>
+  <div class="hint">Lower = catch more seizures (fewer misses, more false alarms). Higher = fewer false alarms. This is the clinical trade-off from the project.</div>
+</div>
+
+<div class="card" id="out" style="display:none">
+  <div class="title">Result</div>
+  <div id="results"></div>
+  <div class="summary" id="summary"></div>
+  <div class="err" id="err"></div>
+</div>
+
+<p class="hint">Runs entirely in your browser - the model (TensorFlow.js) and your data never leave this page. Input must match the training format: single-channel EEG, 178 samples per second.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script>
+var N=178, MODEL=null, SCALER=null, SAMPLES=[];
+var thr=document.getElementById('thr'),thrVal=document.getElementById('thrVal');
+var poolInfo=document.getElementById('poolInfo');
+var lastMat=null,lastTruth=null;   // remember last input so the slider re-renders live
+
+thr.oninput=function(){thrVal.textContent=(+thr.value).toFixed(2);
+  if(lastMat){render(runModel(lastMat,+thr.value,lastTruth));}};
+
+function setBusy(b){['rnd','rnd5','pasteBtn'].forEach(function(id){
+  document.getElementById(id).disabled=b;});}
+
+// ---- load model + assets ---------------------------------------------------
+Promise.all([
+  tf.loadLayersModel('model/model.json'),
+  fetch('scaler.json').then(function(r){return r.json();}),
+  fetch('samples.json').then(function(r){return r.json();})
+]).then(function(res){
+  MODEL=res[0]; SCALER=res[1]; SAMPLES=res[2];
+  poolInfo.textContent=SAMPLES.length+' unseen recordings available';
+  // warm up so the first click is instant
+  tf.tidy(function(){MODEL.predict(tf.zeros([1,N,1]));});
+}).catch(function(e){
+  poolInfo.textContent='';
+  showError('Could not load the model: '+e.message);
+});
+
+// ---- inference (mirrors app.py _predict) -----------------------------------
+function runModel(mat,threshold,truth){
+  var probs=tf.tidy(function(){
+    var scaled=mat.map(function(row){
+      var out=new Array(N);
+      for(var j=0;j<N;j++)out[j]=(row[j]-SCALER.mean[j])/SCALER.scale[j];
+      return out;
+    });
+    var x=tf.tensor(scaled).reshape([mat.length,N,1]);
+    return MODEL.predict(x).reshape([mat.length]);
+  });
+  var arr=probs.dataSync(); probs.dispose();
+  var segments=[];
+  for(var i=0;i<mat.length;i++){
+    var p=arr[i];
+    var seg={index:i,probability:Math.round(p*1e4)/1e4,
+             prediction:p>=threshold?'SEIZURE':'non-seizure',
+             signal:mat[i]};
+    if(truth){seg.truth=truth[i];seg.correct=(truth[i]===seg.prediction);}
+    segments.push(seg);
+  }
+  return {ok:true,segments:segments,has_truth:!!truth};
+}
+
+// ---- CSV parsing (mirrors app.py _parse_csv) -------------------------------
+function parseCSV(text){
+  var lines=text.replace(/\r/g,'').split('\n').filter(function(l){return l.trim()!=='';});
+  if(!lines.length)throw new Error('No data rows found.');
+  var rows=lines.map(function(l){return l.split(',');});
+  // drop a header row if the first row has any non-numeric cell
+  if(rows[0].some(function(c){return c.trim()!==''&&isNaN(Number(c));}))rows=rows.slice(1);
+  if(!rows.length)throw new Error('No data rows found.');
+  // drop a leading id column if it is non-numeric anywhere
+  var idCol=rows.some(function(r){return r[0].trim()!==''&&isNaN(Number(r[0]));});
+  if(idCol)rows=rows.map(function(r){return r.slice(1);});
+  var mat=[];
+  for(var i=0;i<rows.length;i++){
+    if(rows[i].length<N)
+      throw new Error('Each row needs '+N+' numbers, but found only '+rows[i].length+' columns.');
+    var nums=[];
+    for(var j=0;j<N;j++){
+      var v=Number(rows[i][j]);
+      if(!isFinite(v))throw new Error('Some values are not numbers. Every cell must be a number.');
+      nums.push(v);
+    }
+    mat.push(nums);
+  }
+  if(!mat.length)throw new Error('No data rows found.');
+  return mat;
+}
+
+function predictFromMat(mat,truth){
+  if(!MODEL){showError('Model is still loading, please wait a moment.');return;}
+  lastMat=mat;lastTruth=truth||null;
+  setBusy(true);
+  // let the UI paint the disabled state before the (sync) compute
+  setTimeout(function(){
+    try{render(runModel(mat,+thr.value,truth));}
+    catch(e){showError(e.message);}
+    finally{setBusy(false);}
+  },10);
+}
+
+function showError(msg){
+  var out=document.getElementById('out'),err=document.getElementById('err');
+  document.getElementById('results').innerHTML='';
+  document.getElementById('summary').textContent='';
+  out.style.display='block';err.innerHTML='&#9888; '+msg;
+}
+
+// ---- rendering (identical to app.py) ---------------------------------------
+function drawSig(cv,sig){var c=cv.getContext('2d'),w=cv.width=120,h=cv.height=48;
+  c.clearRect(0,0,w,h);var mx=1;for(var i=0;i<sig.length;i++)mx=Math.max(mx,Math.abs(sig[i]));
+  var s=(h*0.42)/mx,mid=h/2,st=getComputedStyle(document.body).getPropertyValue('--trace');
+  c.strokeStyle=st;c.lineWidth=1.5;c.beginPath();
+  for(var j=0;j<sig.length;j++){var x=j/(sig.length-1)*w,y=mid-sig[j]*s;
+    j?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}
+
+function render(d){
+  var out=document.getElementById('out'),res=document.getElementById('results'),
+      err=document.getElementById('err'),sum=document.getElementById('summary');
+  out.style.display='block';res.innerHTML='';err.textContent='';sum.textContent='';
+  if(!d.ok){err.innerHTML='&#9888; '+d.error;return;}
+  var seiz=0,correct=0;
+  d.segments.forEach(function(s){
+    if(s.prediction==='SEIZURE')seiz++;
+    var div=document.createElement('div');div.className='result';
+    var isS=s.prediction==='SEIZURE';
+    var truthHtml='';
+    if(s.truth!==undefined){if(s.correct)correct++;
+      truthHtml='<span class="truth '+(s.correct?'ok':'bad')+'">'+
+        (s.correct?'✔ correct':'✗ actual: '+s.truth)+'</span>';}
+    div.innerHTML=
+      '<span class="pill '+(isS?'seiz':'non')+'">'+(isS?'⚠ SEIZURE':'non-seizure')+'</span>'+
+      '<div class="meta"><span class="pct">recording #'+s.index+' &middot; confidence '+
+        (s.probability*100).toFixed(1)+'%</span>'+
+        '<div class="bar"><i style="width:'+(s.probability*100).toFixed(1)+'%"></i></div></div>'+
+      '<canvas></canvas>'+truthHtml;
+    res.appendChild(div);drawSig(div.querySelector('canvas'),s.signal);
+  });
+  var msg=d.segments.length+' recording(s) &middot; '+seiz+' flagged as seizure';
+  if(d.has_truth)msg+=' &middot; '+correct+'/'+d.segments.length+' matched the true answer';
+  sum.innerHTML=msg;
+}
+
+// ---- random sampling from the bundled unseen recordings --------------------
+function sampleK(k){
+  if(!SAMPLES.length){showError('No sample recordings are available.');return;}
+  var idx=SAMPLES.map(function(_,i){return i;});
+  for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));
+    var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  idx=idx.slice(0,Math.min(k,SAMPLES.length));
+  var mat=idx.map(function(i){return SAMPLES[i].signal.slice();});
+  var truth=idx.map(function(i){return SAMPLES[i].truth;});
+  predictFromMat(mat,truth);
+}
+
+document.getElementById('rnd').onclick=function(){sampleK(1);};
+document.getElementById('rnd5').onclick=function(){sampleK(5);};
+document.getElementById('pasteBtn').onclick=function(){
+  try{predictFromMat(parseCSV(document.getElementById('paste').value));}
+  catch(e){showError(e.message);}};
+
+var drop=document.getElementById('drop'),file=document.getElementById('file');
+function handleFile(f){if(!f)return;var r=new FileReader();
+  r.onload=function(){try{predictFromMat(parseCSV(r.result));}catch(e){showError(e.message);}};
+  r.readAsText(f);}
+drop.onclick=function(){file.click();};
+file.onchange=function(){handleFile(file.files[0]);};
+['dragover','dragenter'].forEach(function(ev){drop.addEventListener(ev,function(e){
+  e.preventDefault();drop.classList.add('hover');});});
+['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){
+  e.preventDefault();drop.classList.remove('hover');});});
+drop.addEventListener('drop',function(e){handleFile(e.dataTransfer.files[0]);});
+</script></body></html>

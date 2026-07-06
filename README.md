@@ -6,11 +6,16 @@ learning model. Trained on the UCI *Epileptic Seizure Recognition* dataset
 
 **Results on held-out test data:** 98.4% accuracy · ROC-AUC 0.9988 · 343 of 345 seizures caught.
 
-### ▶ [View the live presentation »](https://chaitanya-bhatt2003.github.io/epilepsy_detection/)
+### ▶ [Try it live »](https://epilepsy-detection-chaitanya-bhatt-s-projects.vercel.app)
 
-An interactive project page (hosted on GitHub Pages) with a live EEG monitor, the results,
-and the model architecture — no setup required. The "Launch detector" button on that page
-runs the local demo app (`python app.py`), so start it first if you want to try live detection.
+A fully interactive site (hosted on Vercel) with the project overview **and** a working
+**seizure detector that runs entirely in your browser** — the CNN-LSTM model is served as
+TensorFlow.js, so predictions happen client-side with no backend and nothing to install.
+Click **Launch detector**, then try a random unseen recording, upload a CSV, or paste 178
+numbers. (A GitHub Pages mirror of the overview is also at
+`chaitanya-bhatt2003.github.io/epilepsy_detection`.)
+
+Running `python app.py` still gives the same detector locally against the full held-out set.
 
 ## Contents
 
@@ -25,6 +30,8 @@ runs the local demo app (`python app.py`), so start it first if you want to try 
 | `cheatsheet_print.html` | One-page printable cheat sheet |
 | `artifacts/` | Saved trained model (`cnn_lstm_seizure.keras`) + scaler |
 | `sample_new_eeg.csv`, `mini_test_eeg.csv`, `answer_key.csv` | Demo / test data |
+| `web/` | Static site deployed to Vercel — in-browser detector (TensorFlow.js model, scaler + samples as JSON) |
+| `scripts/convert_to_web.py` | Rebuilds the `web/` assets: converts the Keras model to TensorFlow.js and exports the scaler + samples |
 
 ## Quick start
 

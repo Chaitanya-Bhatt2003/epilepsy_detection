@@ -1,0 +1,639 @@
+<style>
+  :root{
+    --bg:#eef1f7; --surface:#ffffff; --surface-2:#f6f8fc; --border:#d7deec;
+    --ink:#0f1826; --ink-soft:#3f4a5e; --muted:#6b7688;
+    --accent:#0c8f86; --accent-ink:#0c8f86; --accent-soft:#d6efec;
+    --seizure:#cf3339; --seizure-soft:#fbe2e2;
+    --grid:rgba(15,24,38,.06); --trace:#0c8f86;
+    --shadow:0 1px 2px rgba(15,24,38,.05),0 8px 30px rgba(15,24,38,.06);
+    --font-display:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"Cascadia Code","SF Mono","Segoe UI Mono",Consolas,monospace;
+    --maxw:1080px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#090e17; --surface:#111927; --surface-2:#0c131f; --border:#1d2a3d;
+      --ink:#e9eef7; --ink-soft:#aab6c9; --muted:#6f7c92;
+      --accent:#26cbbe; --accent-ink:#26cbbe; --accent-soft:rgba(38,203,190,.13);
+      --seizure:#ff6a63; --seizure-soft:rgba(255,106,99,.13);
+      --grid:rgba(255,255,255,.05); --trace:#26cbbe;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f7; --surface:#ffffff; --surface-2:#f6f8fc; --border:#d7deec;
+    --ink:#0f1826; --ink-soft:#3f4a5e; --muted:#6b7688;
+    --accent:#0c8f86; --accent-ink:#0c8f86; --accent-soft:#d6efec;
+    --seizure:#cf3339; --seizure-soft:#fbe2e2;
+    --grid:rgba(15,24,38,.06); --trace:#0c8f86;
+    --shadow:0 1px 2px rgba(15,24,38,.05),0 8px 30px rgba(15,24,38,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#090e17; --surface:#111927; --surface-2:#0c131f; --border:#1d2a3d;
+    --ink:#e9eef7; --ink-soft:#aab6c9; --muted:#6f7c92;
+    --accent:#26cbbe; --accent-ink:#26cbbe; --accent-soft:rgba(38,203,190,.13);
+    --seizure:#ff6a63; --seizure-soft:rgba(255,106,99,.13);
+    --grid:rgba(255,255,255,.05); --trace:#26cbbe;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-display);
+    line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  section{padding:64px 0;border-top:1px solid var(--border);}
+  h1,h2,h3{text-wrap:balance;line-height:1.12;margin:0;letter-spacing:-.02em;}
+  p{margin:0;}
+  a{color:var(--accent-ink);}
+
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--accent-ink);font-weight:600;}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+  .lead{color:var(--ink-soft);font-size:19px;max-width:64ch;}
+  .muted{color:var(--muted);}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;border-top:none;padding:0;overflow:hidden;
+    background:var(--surface-2);border-bottom:1px solid var(--border);}
+  .scope{position:relative;height:min(64vh,560px);min-height:420px;width:100%;display:block;}
+  #eeg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .scope-grid{position:absolute;inset:0;pointer-events:none;
+    background:
+      linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 40px,
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/40px 100%;
+    mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);}
+  .scan{position:absolute;top:0;bottom:0;left:50%;width:1px;
+    background:linear-gradient(var(--seizure),transparent);opacity:.0;transition:opacity .3s;}
+  .hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;
+    justify-content:space-between;padding:28px 24px;pointer-events:none;}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .badge-lead{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 0 var(--accent);animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}
+    70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .status{pointer-events:none;font-family:var(--font-mono);font-size:13px;font-weight:600;
+    letter-spacing:.06em;padding:9px 14px;border-radius:999px;border:1px solid var(--border);
+    background:var(--surface);display:inline-flex;align-items:center;gap:9px;
+    box-shadow:var(--shadow);transition:color .2s,border-color .2s,background .2s;white-space:nowrap;}
+  .status .s-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+  .status.alert{color:var(--seizure);border-color:color-mix(in srgb,var(--seizure) 45%,var(--border));
+    background:var(--seizure-soft);}
+  .status.alert .s-dot{background:var(--seizure);animation:blink .5s steps(2,start) infinite;}
+  @keyframes blink{to{opacity:.25}}
+  .hero-headline{max-width:20ch;}
+  .hero-headline h1{font-size:clamp(30px,5.4vw,60px);font-weight:800;
+    color:var(--ink);}
+  .hero-headline .sig{color:var(--accent-ink);}
+  .hero-headline p{margin-top:14px;font-family:var(--font-mono);font-size:13px;
+    letter-spacing:.03em;color:var(--ink-soft);max-width:52ch;line-height:1.7;}
+  .hero-cta{margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;pointer-events:auto;}
+  .launch-btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-.01em;
+    color:#fff;background:var(--accent);border:1px solid var(--accent);
+    padding:13px 22px;border-radius:12px;box-shadow:var(--shadow);
+    transition:transform .08s ease,filter .2s ease;}
+  .launch-btn:hover{filter:brightness(1.06);}
+  .launch-btn:active{transform:translateY(1px);}
+  .launch-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .launch-btn .lb-dot{width:9px;height:9px;border-radius:50%;background:#fff;
+    box-shadow:0 0 0 0 rgba(255,255,255,.8);animation:pulse 2s infinite;}
+  .launch-btn .lb-arrow{font-size:16px;line-height:1;}
+  .cta-note{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em;}
+  .cta-note code{background:var(--surface);border:1px solid var(--border);
+    padding:1px 6px;border-radius:5px;font-size:11px;color:var(--ink-soft);}
+  @media (prefers-color-scheme:dark){.launch-btn{color:#04120f;}}
+  :root[data-theme="dark"] .launch-btn{color:#04120f;}
+
+  /* ---------- generic ---------- */
+  .grid{display:grid;gap:20px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:24px;box-shadow:var(--shadow);}
+  h2.head{font-size:clamp(24px,3.4vw,36px);font-weight:800;margin-top:12px;color:var(--ink);}
+  .sec-intro{margin-top:14px;}
+
+  /* stat strip */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .stat{background:var(--surface);padding:22px 20px;}
+  .stat .n{font-family:var(--font-mono);font-size:clamp(26px,3.6vw,38px);font-weight:700;
+    color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .stat .n .u{font-size:.5em;color:var(--muted);font-weight:600;margin-left:4px;}
+  .stat .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);margin-top:6px;}
+
+  /* pipeline */
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch;}
+  .step{position:relative;background:var(--surface);border:1px solid var(--border);
+    border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);}
+  .step .si{font-family:var(--font-mono);font-size:11px;color:var(--accent-ink);
+    letter-spacing:.12em;font-weight:700;}
+  .step h4{margin:8px 0 4px;font-size:15px;color:var(--ink);letter-spacing:-.01em;}
+  .step p{font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .flow .step:not(:last-child)::after{content:"→";position:absolute;right:-11px;top:50%;
+    transform:translateY(-50%);color:var(--muted);font-size:15px;z-index:2;}
+
+  /* results */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .metric{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .metric::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+  .metric.crit::before{background:var(--seizure);}
+  .metric .mv{font-family:var(--font-mono);font-size:clamp(28px,4vw,40px);font-weight:700;
+    letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .metric .mk{font-size:13px;color:var(--ink-soft);margin-top:6px;font-weight:600;}
+  .metric .ms{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  .results-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;}
+  .panel-title{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:600;}
+
+  /* confusion matrix */
+  .cm{display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;
+    gap:8px;align-items:stretch;}
+  .cm .axis{font-family:var(--font-mono);font-size:11px;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;text-align:center;letter-spacing:.04em;}
+  .cm .cell{border-radius:12px;padding:16px 12px;text-align:center;border:1px solid var(--border);}
+  .cm .cell .cn{font-family:var(--font-mono);font-size:26px;font-weight:700;
+    font-variant-numeric:tabular-nums;}
+  .cm .cell .cl{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;color:var(--muted);}
+  .cell.tp{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--border));}
+  .cell.tn{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--border));}
+  .cell.tp .cn,.cell.tn .cn{color:var(--accent-ink);}
+  .cell.fn{background:var(--seizure-soft);border-color:color-mix(in srgb,var(--seizure) 35%,var(--border));}
+  .cell.fn .cn{color:var(--seizure);}
+  .cell.fp{background:var(--surface-2);}
+  .cm-note{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.6;}
+  .cm-note b{color:var(--seizure);}
+
+  /* roc */
+  .roc-wrap{width:100%;}
+  .roc-wrap svg{width:100%;height:auto;display:block;}
+  .roc-legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);
+    font-size:11.5px;color:var(--muted);margin-top:12px;}
+  .roc-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;
+    margin-right:6px;vertical-align:middle;}
+
+  /* comparison table */
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:16px;}
+  table{border-collapse:collapse;width:100%;min-width:520px;background:var(--surface);}
+  th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--border);
+    font-size:14px;white-space:nowrap;}
+  th{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;}
+  td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink-soft);}
+  tr:last-child td{border-bottom:none;}
+  tr.best td{background:var(--accent-soft);}
+  tr.best td:first-child{font-weight:700;color:var(--ink);}
+  .tag{font-family:var(--font-mono);font-size:10.5px;padding:3px 8px;border-radius:6px;
+    background:var(--accent);color:#fff;letter-spacing:.05em;margin-left:8px;}
+  @media (prefers-color-scheme:dark){.tag{color:#04120f}}
+  :root[data-theme="dark"] .tag{color:#04120f}
+
+  /* architecture */
+  .arch{display:flex;flex-direction:column;gap:10px;max-width:560px;margin:0 auto;}
+  .layer{display:flex;align-items:center;gap:16px;background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);}
+  .layer .li{font-family:var(--font-mono);font-size:11px;color:var(--muted);width:52px;flex:none;}
+  .layer .ln{font-weight:600;font-size:14px;color:var(--ink);}
+  .layer .ld{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-left:auto;}
+  .layer.conv{border-left:3px solid var(--accent);}
+  .layer.lstm{border-left:3px solid #7c6cf0;}
+  .layer.dense{border-left:3px solid var(--seizure);}
+  .arch-arrow{text-align:center;color:var(--muted);font-size:12px;line-height:0;height:4px;}
+
+  /* two-col text */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .note-card h4{margin:0 0 8px;font-size:15px;color:var(--ink);}
+  .note-card p{font-size:14px;color:var(--ink-soft);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .chip{font-family:var(--font-mono);font-size:12px;padding:6px 11px;border-radius:8px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--ink-soft);}
+
+  /* footer */
+  footer{border-top:1px solid var(--border);padding:40px 0 60px;color:var(--muted);}
+  .foot-grid{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:baseline;}
+  .foot-grid .mono{font-size:12.5px;}
+
+  /* sticky header */
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;padding:11px 24px;
+    background:color-mix(in srgb,var(--surface) 80%,transparent);
+    backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--border);}
+  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    font-weight:800;font-size:15px;letter-spacing:-.01em;color:var(--ink);}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;
+    box-shadow:0 0 0 0 var(--accent);animation:pulse 2s infinite;}
+  .brand-sub{color:var(--muted);font-weight:600;font-family:var(--font-mono);font-size:12px;}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+
+  /* theme toggle */
+  .toggle{pointer-events:auto;font-family:var(--font-mono);font-size:12px;padding:9px 13px;
+    border-radius:999px;border:1px solid var(--border);background:var(--surface-2);
+    color:var(--ink-soft);cursor:pointer;}
+  .toggle:hover{border-color:var(--accent);}
+  .toggle:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .launch-btn.sm{padding:9px 15px;font-size:13.5px;border-radius:10px;box-shadow:none;}
+  @media (max-width:560px){
+    .brand-sub{display:none;}
+    .launch-btn.sm .lb-arrow{display:none;}
+  }
+
+  @media (max-width:820px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .flow{grid-template-columns:1fr 1fr}
+    .flow .step::after{display:none}
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    .results-grid{grid-template-columns:1fr}
+    .cols{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .dot,.status.alert .s-dot{animation:none;}
+    .cover-line .p{animation:none;stroke-dashoffset:0;}
+  }
+
+  /* ---------- COVER / TITLE SLIDE ---------- */
+  .cover{position:relative;min-height:100vh;display:flex;flex-direction:column;
+    justify-content:center;overflow:hidden;background:var(--surface-2);border-top:none;
+    padding:64px 0;}
+  .cover-bg{position:absolute;inset:0;pointer-events:none;opacity:.9;}
+  .cover-bg svg{width:100%;height:100%;display:block;}
+  .cover-line .p{fill:none;stroke:var(--trace);stroke-width:2;opacity:.5;
+    stroke-dasharray:2600;stroke-dashoffset:2600;animation:drawline 3.2s ease-out .2s forwards;}
+  @keyframes drawline{to{stroke-dashoffset:0;}}
+  .cover-grid{position:absolute;inset:0;pointer-events:none;
+    background:
+      linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 48px,
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/48px 100%;
+    mask-image:radial-gradient(120% 90% at 50% 45%,#000 40%,transparent 100%);}
+  .cover-inner{position:relative;z-index:2;}
+  .cover-kicker{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-mono);
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);
+    font-weight:600;border:1px solid var(--border);background:var(--surface);
+    padding:8px 14px;border-radius:999px;box-shadow:var(--shadow);}
+  .cover h1{font-size:clamp(38px,8vw,86px);font-weight:800;color:var(--ink);
+    margin-top:26px;letter-spacing:-.03em;line-height:1.02;max-width:16ch;}
+  .cover h1 .sig{color:var(--accent-ink);}
+  .cover .sub{font-family:var(--font-mono);font-size:clamp(13px,1.6vw,16px);
+    color:var(--ink-soft);margin-top:22px;letter-spacing:.02em;max-width:60ch;line-height:1.7;}
+  .cover-rule{height:1px;background:var(--border);margin:34px 0;max-width:520px;}
+  .cover-by{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .cover-by .lab{font-family:var(--font-mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);}
+  .cover-by .name{font-size:clamp(22px,3vw,30px);font-weight:700;color:var(--ink);
+    letter-spacing:-.01em;}
+  .cover-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px;}
+  .cover-meta .chip{font-family:var(--font-mono);font-size:12px;padding:7px 12px;
+    border-radius:8px;background:var(--surface);border:1px solid var(--border);
+    color:var(--ink-soft);box-shadow:var(--shadow);}
+  .cover-scroll{position:absolute;left:0;right:0;bottom:26px;text-align:center;z-index:2;
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);}
+  .cover-scroll .ar{display:block;margin:8px auto 0;animation:bob 1.8s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  @media (prefers-reduced-motion:reduce){.cover-scroll .ar{animation:none;}}
+</style>
+
+<!-- ============ STICKY HEADER ============ -->
+<div class="topbar">
+  <a class="brand" href="#top" aria-label="Epileptic Seizure Detection — top">
+    <span class="brand-dot"></span>
+    <span class="brand-name">Seizure Detection<span class="brand-sub"> · CNN-LSTM</span></span>
+  </a>
+  <div class="topbar-actions">
+    <button class="toggle" id="themeToggle" aria-label="Toggle colour theme">◐ theme</button>
+    <a class="launch-btn sm" href="detector.html">
+      <span class="lb-dot"></span>Launch detector<span class="lb-arrow" aria-hidden="true">↗</span>
+    </a>
+  </div>
+</div>
+
+<span id="top"></span>
+<!-- ============ COVER / TITLE SLIDE ============ -->
+<header class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-bg cover-line" aria-hidden="true">
+    <svg viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice">
+      <path class="p" d="M0,200 L120,200 L150,196 L180,204 L210,198 L240,202 L270,197 L300,203
+        L330,200 L360,150 L375,268 L390,120 L405,300 L420,90 L435,320 L450,130 L465,250 L480,200
+        L520,200 L560,196 L600,204 L640,198 L680,203 L700,160 L714,255 L728,110 L742,300 L756,80
+        L770,330 L784,140 L798,240 L812,200 L860,200 L900,197 L940,203 L980,199 L1020,201
+        L1060,198 L1100,202 L1140,200 L1200,200" />
+    </svg>
+  </div>
+  <div class="wrap cover-inner">
+    <span class="cover-kicker"><span class="dot"></span>&nbsp;End&#8209;Term Project · Deep Learning</span>
+    <h1>Epileptic Seizure Detection from <span class="sig">EEG</span></h1>
+    <p class="sub">A CNN&#8209;LSTM neural network that reads one second of brain activity and flags seizure onset — trained and evaluated on 11,500 EEG recordings.</p>
+    <div class="cover-rule"></div>
+    <div class="cover-by">
+      <span class="lab">Presented by</span>
+      <span class="name">Chaitanya Bhatt</span>
+    </div>
+    <div class="cover-meta">
+      <span class="chip">CNN&#8209;LSTM</span>
+      <span class="chip">TensorFlow 2.21</span>
+      <span class="chip">98.4% accuracy</span>
+      <span class="chip">AUC 0.9988</span>
+    </div>
+  </div>
+  <div class="cover-scroll">scroll to begin<span class="ar">↓</span></div>
+</header>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="scope">
+    <canvas id="eeg"></canvas>
+    <div class="scope-grid"></div>
+    <div class="scan" id="scan"></div>
+    <div class="hero-overlay">
+      <div class="hero-top">
+        <div class="badge-lead"><span class="dot"></span>&nbsp;EEG&nbsp;·&nbsp;channel&nbsp;1&nbsp;·&nbsp;178&nbsp;Hz</div>
+        <div class="status" id="status"><span class="s-dot"></span><span id="statusText">MONITORING · normal</span></div>
+      </div>
+      <div class="hero-headline">
+        <p class="eyebrow">Deep Learning · Biomedical Signal Processing</p>
+        <h1 style="margin-top:12px">Detecting <span class="sig">epileptic seizures</span> from EEG in real time</h1>
+        <p>A CNN&#8209;LSTM neural network that reads one second of brain activity and flags seizure onset — trained on 11,500 EEG recordings, catching 343 of 345 seizures on unseen data.</p>
+        <div class="hero-cta">
+          <a class="launch-btn" href="detector.html">
+            <span class="lb-dot"></span>Launch live detector
+            <span class="lb-arrow" aria-hidden="true">↗</span>
+          </a>
+          <span class="cta-note">runs live in your browser · no setup needed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PROBLEM ============ -->
+<section id="problem">
+  <div class="wrap">
+    <p class="eyebrow">The problem</p>
+    <h2 class="head">Roughly 50 million people live with epilepsy. A seizure missed is a life at risk.</h2>
+    <p class="lead sec-intro">Epileptic seizures show up in the electroencephalogram (EEG) as sudden, high&#8209;energy bursts of electrical activity. Reading these traces by hand is slow and needs an expert neurologist. This project trains a model to do the reading automatically — turning a one&#8209;second window of raw brain signal into a seizure / no&#8209;seizure decision, the building block of a wearable seizure&#8209;alert system.</p>
+  </div>
+</section>
+
+<!-- ============ DATASET ============ -->
+<section id="data">
+  <div class="wrap">
+    <p class="eyebrow">The data · UCI Epileptic Seizure Recognition</p>
+    <h2 class="head" style="margin-bottom:28px">An instrument panel of the dataset</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">11,500</div><div class="k">EEG segments</div></div>
+      <div class="stat"><div class="n">178<span class="u">/seg</span></div><div class="k">samples · 1 second</div></div>
+      <div class="stat"><div class="n">178<span class="u">Hz</span></div><div class="k">sampling rate</div></div>
+      <div class="stat"><div class="n">5</div><div class="k">balanced classes</div></div>
+    </div>
+    <p class="lead sec-intro" style="margin-top:24px">Each recording is labelled 1–5. Class&nbsp;<b style="color:var(--seizure)">1 is an active seizure</b>; classes 2–5 are non&#8209;seizure brain states (tumour area, healthy area, eyes closed, eyes open). We collapse this into a <b>binary</b> task — seizure vs. everything else — a realistic 20% / 80% class imbalance handled with class weighting.</p>
+  </div>
+</section>
+
+<!-- ============ PIPELINE ============ -->
+<section id="pipeline">
+  <div class="wrap">
+    <p class="eyebrow">Method</p>
+    <h2 class="head" style="margin-bottom:28px">From raw signal to decision</h2>
+    <div class="flow">
+      <div class="step"><div class="si">01</div><h4>Load</h4><p>11,500 × 178 EEG matrix; drop the id column.</p></div>
+      <div class="step"><div class="si">02</div><h4>Explore</h4><p>Class balance, waveform shapes, signal&#8209;energy separation.</p></div>
+      <div class="step"><div class="si">03</div><h4>Preprocess</h4><p>Stratified 70/15/15 split · leakage&#8209;free scaling · reshape to sequences.</p></div>
+      <div class="step"><div class="si">04</div><h4>Train</h4><p>CNN&#8209;LSTM with class weights, early stopping, LR scheduling.</p></div>
+      <div class="step"><div class="si">05</div><h4>Evaluate</h4><p>Held&#8209;out test set · clinical threshold tuning for recall.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results">
+  <div class="wrap">
+    <p class="eyebrow">Results · held-out test set (1,725 segments)</p>
+    <h2 class="head" style="margin-bottom:28px">The CNN-LSTM catches almost every seizure</h2>
+
+    <div class="metrics">
+      <div class="metric"><div class="mv">98.4%</div><div class="mk">Overall accuracy</div><div class="ms">1,697 / 1,725 correct</div></div>
+      <div class="metric crit"><div class="mv">99.4%</div><div class="mk">Seizure recall</div><div class="ms">sensitivity — misses matter most</div></div>
+      <div class="metric"><div class="mv">0.9988</div><div class="mk">ROC-AUC</div><div class="ms">near-perfect ranking</div></div>
+      <div class="metric crit"><div class="mv">2</div><div class="mk">Seizures missed</div><div class="ms">out of 345 true seizures</div></div>
+    </div>
+
+    <div class="results-grid">
+      <!-- confusion matrix -->
+      <div class="card">
+        <div class="panel-title">Confusion matrix — CNN-LSTM</div>
+        <div class="cm">
+          <div class="axis"></div>
+          <div class="axis">pred: non-seizure</div>
+          <div class="axis">pred: seizure</div>
+          <div class="axis" style="writing-mode:vertical-rl;transform:rotate(180deg)">actual: non-seizure</div>
+          <div class="cell tn"><div class="cn">1354</div><div class="cl">true negative</div></div>
+          <div class="cell fp"><div class="cn">26</div><div class="cl">false alarm</div></div>
+          <div class="axis" style="writing-mode:vertical-rl;transform:rotate(180deg)">actual: seizure</div>
+          <div class="cell fn"><div class="cn">2</div><div class="cl">missed seizure</div></div>
+          <div class="cell tp"><div class="cn">343</div><div class="cl">caught seizure</div></div>
+        </div>
+        <p class="cm-note">Only <b>2 seizures slipped through</b>, against 26 false alarms — exactly the trade&#8209;off you want clinically, where a false alarm is cheap but a missed seizure is dangerous.</p>
+      </div>
+
+      <!-- ROC curve -->
+      <div class="card">
+        <div class="panel-title">ROC curve — true vs. false positive rate</div>
+        <div class="roc-wrap" id="rocWrap"></div>
+        <div class="roc-legend">
+          <span><i style="background:var(--trace)"></i>CNN-LSTM · AUC 0.9988</span>
+          <span><i style="background:var(--muted)"></i>random baseline</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="panel-title">Model comparison</div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Model</th><th>Accuracy</th><th>Seizure recall</th><th>Seizure precision</th><th>ROC-AUC</th></tr></thead>
+          <tbody>
+            <tr><td>Random Forest <span class="muted mono" style="font-size:12px">baseline</span></td><td class="num">97.0%</td><td class="num">0.87</td><td class="num">0.96</td><td class="num">0.9952</td></tr>
+            <tr class="best"><td>CNN-LSTM <span class="tag">best recall</span></td><td class="num">98.4%</td><td class="num">0.99</td><td class="num">0.93</td><td class="num">0.9988</td></tr>
+            <tr><td>CNN-LSTM <span class="muted mono" style="font-size:12px">tuned threshold 0.968</span></td><td class="num">99.0%</td><td class="num">0.95</td><td class="num">0.99</td><td class="num">0.9988</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="arch">
+  <div class="wrap">
+    <p class="eyebrow">Under the hood</p>
+    <h2 class="head" style="margin-bottom:10px">Why CNN <span style="color:var(--muted)">+</span> LSTM</h2>
+    <p class="lead sec-intro" style="margin-bottom:28px">Convolutions learn the <b>local shapes</b> of the signal — the sharp spikes and waves of a seizure. The LSTM then models how those shapes <b>evolve over the one&#8209;second sequence</b>. Together they read an EEG the way a neurologist scans a trace.</p>
+    <div class="arch">
+      <div class="layer"><span class="li">input</span><span class="ln">EEG sequence</span><span class="ld">178 × 1</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="layer conv"><span class="li">conv</span><span class="ln">Conv1D · BatchNorm · MaxPool</span><span class="ld">64 filters</span></div>
+      <div class="layer conv"><span class="li">conv</span><span class="ln">Conv1D · BatchNorm · MaxPool</span><span class="ld">128 filters</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="layer lstm"><span class="li">recur</span><span class="ln">Bidirectional LSTM</span><span class="ld">64 units</span></div>
+      <div class="layer lstm"><span class="li">recur</span><span class="ln">Bidirectional LSTM · Dropout</span><span class="ld">32 units</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="layer dense"><span class="li">head</span><span class="ln">Dense · Dropout · Sigmoid</span><span class="ld">P(seizure)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RIGOUR / NEXT ============ -->
+<section id="rigour">
+  <div class="wrap">
+    <p class="eyebrow">Rigour &amp; reproducibility</p>
+    <h2 class="head" style="margin-bottom:28px">Built to be checked, not just to score well</h2>
+    <div class="cols">
+      <div class="card note-card">
+        <h4>What makes the result trustworthy</h4>
+        <p>A fixed random seed, a <b>stratified train/validation/test split</b>, and scaling fit on training data only — so no test information leaks into the model. A Random Forest baseline sets the bar the deep model must beat. Because a missed seizure is worse than a false alarm, a threshold&#8209;tuning step lets the operating point favour <b>recall</b>.</p>
+        <div class="chips">
+          <span class="chip">seed = 42</span><span class="chip">stratified split</span>
+          <span class="chip">no data leakage</span><span class="chip">class weighting</span>
+          <span class="chip">early stopping</span>
+        </div>
+      </div>
+      <div class="card note-card">
+        <h4>Where it goes next</h4>
+        <p>The honest next steps that would take this from coursework to publishable: <b>patient&#8209;independent splits</b> (group by subject) to prove it generalises to new people, <b>k&#8209;fold cross&#8209;validation</b> for tighter error bars, spectral / spectrogram features, the full 5&#8209;class problem, and export to <b>TensorFlow Lite</b> for on&#8209;device seizure alerting.</p>
+        <div class="chips">
+          <span class="chip">patient-independent</span><span class="chip">k-fold CV</span>
+          <span class="chip">spectrograms</span><span class="chip">5-class</span>
+          <span class="chip">TF Lite / on-device</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <div style="font-weight:700;color:var(--ink);font-size:15px">Epileptic Seizure Detection</div>
+      <div class="mono" style="margin-top:6px">End&#8209;term project · EEG · CNN&#8209;LSTM</div>
+    </div>
+    <div class="mono" style="text-align:right;line-height:1.9">
+      <div>main_1.ipynb · 29 cells · executed end&#8209;to&#8209;end</div>
+      <div>TensorFlow 2.21 · scikit&#8209;learn · Python 3.12</div>
+      <div class="muted">Artifacts: cnn_lstm_seizure.keras · scaler.joblib</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ---------- theme toggle ----------
+  var root=document.documentElement, btn=document.getElementById('themeToggle');
+  btn.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme');
+    if(!cur){cur=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    var next=cur==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    draw&&draw(true); buildRoc();
+  });
+
+  function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+  // ---------- real EEG waveforms from the dataset ----------
+  var SEIZ=[386,382,356,331,320,315,307,272,244,232,237,258,212,2,-267,-605,-850,-1001,-1109,-1090,-967,-746,-464,-152,118,318,427,473,485,447,397,339,312,314,326,335,332,324,310,312,309,309,303,297,295,295,293,286,279,283,301,308,285,252,215,194,169,111,-74,-388,-679,-892,-949,-972,-1001,-1006,-949,-847,-668,-432,-153,72,226,326,392,461,495,513,511,496,479,453,440,427,414,399,385,385,404,432,444,437,418,392,373,363,365,372,385,388,383,371,360,353,334,303,252,200,153,151,143,48,-206,-548,-859,-1067,-1069,-957,-780,-597,-460,-357,-276,-224,-210,-350,-930,-1413,-1716,-1360,-662,-96,243,323,241,29,-167,-228,-136,27,146,229,269,297,307,303,305,306,307,280,231,159,85,51,43,62,63,63,69,89,123,136,127,102,95,105,131,163,168,164,150,146,152,157,156,154,143,129];
+  var NON=[-105,-101,-96,-92,-89,-95,-102,-100,-87,-79,-72,-68,-74,-80,-83,-73,-68,-61,-58,-59,-64,-79,-84,-97,-94,-84,-77,-75,-72,-68,-76,-76,-72,-67,-69,-69,-69,-67,-68,-69,-67,-66,-58,-54,-56,-70,-80,-82,-85,-74,-70,-71,-82,-88,-93,-97,-89,-87,-83,-70,-50,-37,-31,-32,-39,-54,-64,-68,-67,-69,-63,-60,-63,-55,-43,-37,-27,-31,-35,-47,-58,-63,-74,-73,-67,-60,-56,-49,-46,-57,-58,-62,-63,-63,-61,-56,-65,-62,-57,-61,-63,-66,-69,-86,-89,-86,-83,-87,-80,-69,-62,-57,-60,-60,-68,-58,-53,-57,-66,-66,-73,-78,-73,-84,-92,-97,-88,-81,-72,-61,-66,-72,-88,-90,-88,-77,-58,-53,-61,-69,-66,-74,-69,-61,-51,-45,-45,-49,-58,-64,-78,-80,-90,-87,-83,-78,-64,-38,-22,-29,-42,-51,-68,-71,-69,-69,-74,-74,-80,-82,-81,-80,-77,-85,-77,-72,-69,-65];
+  // build a looping signal: calm baseline -> seizure burst -> calm baseline
+  var SIG=[].concat(NON,NON,SEIZ,NON,NON);
+
+  // ---------- animated oscilloscope ----------
+  var cv=document.getElementById('eeg'), ctx=cv.getContext('2d');
+  var status=document.getElementById('status'), stext=document.getElementById('statusText'),
+      scan=document.getElementById('scan');
+  var W=0,H=0,dpr=1, SPAN=300 /*samples across screen*/, off=0, reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function sampleAt(i){ i=((i%SIG.length)+SIG.length)%SIG.length; return SIG[i|0]; }
+
+  function draw(force){
+    if(!W||!H) resize();
+    ctx.clearRect(0,0,W,H);
+    var mid=H*0.5, scale=(H*0.40)/1750;
+    // trace
+    var trace=cssv('--trace')||'#26cbbe';
+    ctx.lineWidth=2; ctx.strokeStyle=trace; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.shadowColor=trace; ctx.shadowBlur=10;
+    ctx.beginPath();
+    var N=Math.floor(W);
+    for(var x=0;x<=N;x++){
+      var s=off + (x/N)*SPAN;
+      var v=sampleAt(s);
+      var y=mid - v*scale;
+      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // detection: variance of samples currently in the centre window
+    var c0=off+SPAN*0.38, c1=off+SPAN*0.62, sum=0,sum2=0,cnt=0;
+    for(var k=c0;k<c1;k+=1){ var val=sampleAt(k); sum+=val; sum2+=val*val; cnt++; }
+    var mean=sum/cnt, varc=sum2/cnt-mean*mean;
+    var seizureNow = varc > 30000;
+    if(seizureNow){
+      status.classList.add('alert'); stext.textContent='⚠ SEIZURE DETECTED';
+      scan.style.opacity=.9;
+    } else {
+      status.classList.remove('alert'); stext.textContent='MONITORING · normal';
+      scan.style.opacity=0;
+    }
+  }
+
+  var raf;
+  function loop(){ off += 1.15; draw(); raf=requestAnimationFrame(loop); }
+
+  window.addEventListener('resize',function(){resize();draw(true);});
+  resize();
+  if(reduce){ off=NON.length*2; draw(true); } else { loop(); }
+
+  // ---------- ROC curve (real points) ----------
+  var ROC=[[0,0],[0,0.0029],[0,0.0638],[0,0.2435],[0,0.2667],[0,0.287],[0,0.3594],[0,0.4174],[0,0.429],[0,0.4551],[0,0.5884],[0,0.8783],[0.0007,0.8783],[0.0014,0.9275],[0.0014,0.942],[0.0022,0.9507],[0.0058,0.9507],[0.0065,0.9594],[0.0087,0.9594],[0.0094,0.9681],[0.0101,0.971],[0.0109,0.9739],[0.0116,0.9797],[0.0159,0.9826],[0.0159,0.9855],[0.0565,0.9942],[0.0565,0.9971],[0.1587,1],[0.7036,1],[1,1]];
+  function buildRoc(){
+    var wrap=document.getElementById('rocWrap');
+    var w=520,h=360,pad=44;
+    var ink=cssv('--ink-soft')||'#888', grid=cssv('--grid')||'#eee',
+        trace=cssv('--trace')||'#26cbbe', muted=cssv('--muted')||'#888',
+        acc=cssv('--accent')||'#0c8f86';
+    function X(v){return pad+v*(w-pad-14);}
+    function Y(v){return (h-pad)-v*(h-pad-14);}
+    var g='';
+    // grid
+    for(var t=0;t<=1.0001;t+=0.25){
+      g+='<line x1="'+X(t)+'" y1="'+Y(0)+'" x2="'+X(t)+'" y2="'+Y(1)+'" stroke="'+grid+'" stroke-width="1"/>';
+      g+='<line x1="'+X(0)+'" y1="'+Y(t)+'" x2="'+X(1)+'" y2="'+Y(t)+'" stroke="'+grid+'" stroke-width="1"/>';
+      g+='<text x="'+X(t)+'" y="'+(h-pad+18)+'" fill="'+muted+'" font-size="11" font-family="ui-monospace,monospace" text-anchor="middle">'+t.toFixed(2)+'</text>';
+      g+='<text x="'+(pad-10)+'" y="'+(Y(t)+4)+'" fill="'+muted+'" font-size="11" font-family="ui-monospace,monospace" text-anchor="end">'+t.toFixed(2)+'</text>';
+    }
+    // diagonal baseline
+    g+='<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(1)+'" y2="'+Y(1)+'" stroke="'+muted+'" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.6"/>';
+    // roc path (step-ish, use the real points)
+    var d='M '+X(ROC[0][0])+' '+Y(ROC[0][1]);
+    for(var i=1;i<ROC.length;i++) d+=' L '+X(ROC[i][0])+' '+Y(ROC[i][1]);
+    // area fill
+    var area=d+' L '+X(1)+' '+Y(0)+' L '+X(0)+' '+Y(0)+' Z';
+    g+='<path d="'+area+'" fill="'+acc+'" opacity="0.10"/>';
+    g+='<path d="'+d+'" fill="none" stroke="'+trace+'" stroke-width="2.5" stroke-linejoin="round"/>';
+    // axis labels
+    g+='<text x="'+((w)/2)+'" y="'+(h-6)+'" fill="'+ink+'" font-size="12" font-family="ui-monospace,monospace" text-anchor="middle">false positive rate</text>';
+    g+='<text transform="translate(14,'+((h-pad)/2+pad/2)+') rotate(-90)" fill="'+ink+'" font-size="12" font-family="ui-monospace,monospace" text-anchor="middle">true positive rate</text>';
+    wrap.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="ROC curve, area under curve 0.9988">'+g+'</svg>';
+  }
+  buildRoc();
+})();
+</script>
